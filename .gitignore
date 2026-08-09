@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+dist
+*.log
+.env*
+.DS_Store
+
+# Playwright test artifacts
+.playwright-mcp/
+*.png
+
+# Backup zips
+vaultfolio-backup.zip
+apple-design.zip

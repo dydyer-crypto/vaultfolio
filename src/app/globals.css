@@ -1,0 +1,759 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── shadcn/ui CSS variables (dark theme) ─── */
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+}
+
+:root {
+  color-scheme: dark;
+
+  /* ─── UI Pro Max: Z-Index Scale (10/20/40/50/100) ─── */
+  --z-base: 0;
+  --z-content: 10;
+  --z-sticky: 20;
+  --z-dropdown: 40;
+  --z-overlay: 50;
+  --z-modal: 100;
+
+  /* ─── UI Pro Max: Color Tokens (Fintech/Crypto palette) ─── */
+  --color-primary: #3366ff;
+  --color-secondary: #4d7cff;
+  --color-accent: #8b5cf6;
+  --color-gold: #fbbf24;
+  --color-bg: #0f172a;
+  --color-surface: #222735;
+  --color-muted: #94a3b8;
+  --color-border: #334155;
+  --color-success: #34d399;
+  --color-error: #ef4444;
+
+  /* Apple spring easings — damping 1.0 (critically damped) */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Damping ~0.8 (slight overshoot for momentum) */
+  --ease-spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Fast response */
+  --ease-spring-snappy: cubic-bezier(0.28, 0.84, 0.42, 1);
+  /* Cinema easing (Expo.out) — from Modern Dark style */
+  --ease-cinema: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Material tokens */
+  --material-blur: 20px;
+  --material-saturate: 180%;
+  --material-bg: rgba(15, 23, 42, 0.72);
+  --material-bg-thick: rgba(15, 23, 42, 0.88);
+  --material-edge: rgba(255, 255, 255, 0.08);
+
+  /* Press feedback timing */
+  --press-duration: 100ms;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+  font-family: -apple-system, "Inter", system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[dir="rtl"] body {
+  text-align: right;
+}
+
+::selection {
+  @apply bg-brand-500/40;
+}
+
+/* ─── Apple Typography: size-specific tracking + leading ─── */
+
+h1, .h1 {
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  font-optical-sizing: auto;
+}
+
+h2, .h2 {
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+h3, .h3 {
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+h4, .h4 {
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Body copy — near-zero tracking, comfortable leading */
+p, li {
+  letter-spacing: 0;
+  line-height: 1.55;
+}
+
+/* Small text — slightly positive tracking for legibility */
+.text-xs, .text-sm {
+  letter-spacing: 0.01em;
+}
+
+/* Display text — maximum negative tracking */
+.display {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  font-optical-sizing: auto;
+}
+
+/* ─── Apple Materials: translucent surfaces ─── */
+
+.material {
+  background: var(--material-bg);
+  backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  border: 1px solid var(--material-edge);
+}
+
+/* Thicker material for modals/sheets — darker, more opaque */
+.material-thick {
+  background: var(--material-bg-thick);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--material-edge);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.05),
+    0 24px 80px -20px rgba(0, 0, 0, 0.6),
+    0 8px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* Light material for floating chips/badges */
+.material-light {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+/* Vibrancy: text legibility over translucent surfaces */
+.material-text {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ─── Apple Response: instant feedback on pointer-down ─── */
+
+/* Pressable: scale down instantly on press */
+.pressable {
+  transition: transform var(--press-duration) var(--ease-spring),
+              background-color 150ms ease-out,
+              border-color 150ms ease-out,
+              box-shadow 200ms var(--ease-spring);
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pressable:active {
+  transform: scale(0.96);
+  transition: transform 80ms var(--ease-spring-snappy);
+}
+
+/* Card pressable: gentler press */
+.card-pressable {
+  transition: transform var(--press-duration) var(--ease-spring),
+              border-color 200ms ease-out,
+              background-color 200ms ease-out;
+  will-change: transform;
+}
+
+.card-pressable:active {
+  transform: scale(0.985);
+}
+
+/* ─── Apple Springs: entrance/exit animations ─── */
+
+@keyframes spring-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spring-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spring-down {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes material-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+    backdrop-filter: blur(0px) saturate(0%);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    backdrop-filter: blur(40px) saturate(180%);
+  }
+}
+
+.animate-spring-up {
+  animation: spring-up 400ms var(--ease-spring) both;
+}
+
+.animate-spring-in {
+  animation: spring-in 350ms var(--ease-spring) both;
+}
+
+.animate-spring-down {
+  animation: spring-down 300ms var(--ease-spring) both;
+}
+
+.animate-material-in {
+  animation: material-in 400ms var(--ease-spring) both;
+}
+
+/* Stagger for lists */
+.animate-stagger > * {
+  animation: spring-up 400ms var(--ease-spring) both;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 40ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 80ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 120ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 160ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 200ms; }
+.animate-stagger > *:nth-child(7) { animation-delay: 240ms; }
+.animate-stagger > *:nth-child(8) { animation-delay: 280ms; }
+
+/* ─── Apple Scroll edge effects (not hard dividers) ─── */
+
+.scroll-fade-top {
+  mask-image: linear-gradient(to bottom, transparent 0, black 24px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 24px);
+}
+
+.scroll-fade-bottom {
+  mask-image: linear-gradient(to top, transparent 0, black 24px);
+  -webkit-mask-image: linear-gradient(to top, transparent 0, black 24px);
+}
+
+.scroll-fade-both {
+  mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+}
+
+/* Floating header gradient — content fades under translucent bar */
+.header-edge {
+  position: relative;
+}
+.header-edge::after {
+  content: "";
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: linear-gradient(to bottom, var(--material-bg), transparent);
+  pointer-events: none;
+}
+
+/* ─── Scrollbar: thin, translucent, Apple-style ─── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply rounded-full;
+  background: rgba(148, 163, 184, 0.25);
+  transition: background 200ms;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* ─── Apple Reduced Motion: cross-fade, no slides/springs ─── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 200ms !important;
+    animation-timing-function: ease-out !important;
+    transition-duration: 150ms !important;
+    transition-timing-function: ease-out !important;
+  }
+
+  .animate-spring-up,
+  .animate-spring-in,
+  .animate-spring-down,
+  .animate-material-in,
+  .animate-stagger > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .pressable:active,
+  .card-pressable:active {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material,
+  .material-thick {
+    background: var(--material-bg-thick);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .material-light {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .material,
+  .material-thick {
+    background: rgb(15, 23, 42);
+    border-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .material-text {
+    color: white;
+    font-weight: 600;
+  }
+}
+
+/* ─── Focus rings: subtle, Apple-style ─── */
+
+:focus-visible {
+  outline: 2px solid var(--brand-400, #588bff);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid #588bff;
+  outline-offset: 2px;
+}
+
+/* ─── Smooth scroll: momentum on touch ─── */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* ═══ UI Pro Max Enhancements ═══ */
+
+/* ─── Touch targets ≥ 44px (Apple HIG / Material) ─── */
+button,
+a[role="button"],
+select,
+input,
+[data-touchable] {
+  min-height: 36px;
+  touch-action: manipulation;
+}
+
+@media (pointer: coarse) {
+  button,
+  a[role="button"],
+  select,
+  [data-touchable] {
+    min-height: 44px;
+  }
+}
+
+/* ─── Cursor pointer on all clickable elements ─── */
+button:not(:disabled),
+a[href],
+[role="button"],
+select,
+.clickable {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ─── Tabular numbers for prices/balances (prevents layout shift) ─── */
+.tabular-nums,
+.font-mono-data {
+  font-family: "JetBrains Mono", "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Z-Index utilities ─── */
+.z-content { z-index: var(--z-content); }
+.z-sticky { z-index: var(--z-sticky); }
+.z-dropdown { z-index: var(--z-dropdown); }
+.z-overlay { z-index: var(--z-overlay); }
+.z-modal { z-index: var(--z-modal); }
+
+/* ─── Skeleton shimmer (enhanced loading) ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.08) 25%,
+    rgba(148, 163, 184, 0.15) 50%,
+    rgba(148, 163, 184, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ─── Accessible error/toast regions ─── */
+[aria-live="polite"],
+[role="alert"],
+[role="status"] {
+  /* Screen readers announce changes without stealing focus */
+}
+
+/* ─── Cinema ambient glow blobs (Modern Dark style) ─── */
+@keyframes ambient-float {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(30px, -20px); }
+  66% { transform: translate(-20px, 15px); }
+}
+
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.08;
+  pointer-events: none;
+  animation: ambient-float 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob { animation: none; }
+}
+
+/* ─── Accent glow behind primary buttons ─── */
+.accent-glow {
+  box-shadow: 0 0 20px rgba(51, 102, 255, 0.3), 0 0 40px rgba(51, 102, 255, 0.1);
+}
+
+/* ─── Gradient text for balances ─── */
+.gradient-text-gold {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-primary {
+  background: linear-gradient(135deg, #3366ff, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── Disabled state (UI Pro Max: visible distinction) ─── */
+.is-disabled,
+button:disabled,
+input:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Pulse dot (status indicators) ─── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot { animation: none; }
+}
+
+/* ═══ Animations Engine ═══ */
+
+/* ─── Scroll reveal directions ─── */
+@keyframes reveal-left {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes reveal-right {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes reveal-fade-scale {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.reveal-left { animation: reveal-left 500ms var(--ease-spring) both; }
+.reveal-right { animation: reveal-right 500ms var(--ease-spring) both; }
+.reveal-fade-scale { animation: reveal-fade-scale 400ms var(--ease-spring) both; }
+
+/* ─── Card hover lift + glow ─── */
+.lift-on-hover {
+  transition:
+    transform 300ms var(--ease-spring),
+    box-shadow 300ms ease-out,
+    border-color 200ms ease-out;
+  will-change: transform;
+}
+.lift-on-hover:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 40px -8px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(51, 102, 255, 0.08);
+}
+.lift-on-hover:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+/* ─── Ripple effect on press ─── */
+@keyframes ripple-expand {
+  from {
+    transform: scale(0);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-ink {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  animation: ripple-expand 600ms var(--ease-spring) forwards;
+}
+
+/* ─── Shimmer gradient text ─── */
+@keyframes shimmer-text {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #fbbf24 0%,
+    #ffffff 25%,
+    #fbbf24 50%,
+    #ffffff 75%,
+    #fbbf24 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-text 3s linear infinite;
+}
+
+.shimmer-text-primary {
+  background: linear-gradient(
+    90deg,
+    #3366ff 0%,
+    #8b5cf6 25%,
+    #3366ff 50%,
+    #8b5cf6 75%,
+    #3366ff 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-text 4s linear infinite;
+}
+
+/* ─── Chart line drawing animation ─── */
+@keyframes draw-line {
+  from { stroke-dashoffset: 200; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes draw-line-long {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+.chart-line-animated {
+  stroke-dasharray: 1000;
+  animation: draw-line-long 2s var(--ease-spring) forwards;
+}
+
+@keyframes chart-fill-in {
+  from { opacity: 0; }
+  to { opacity: 0.1; }
+}
+
+.chart-area-animated {
+  animation: chart-fill-in 800ms ease-out 800ms both;
+}
+
+/* ─── Floating animation (CTA attention) ─── */
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.float-subtle {
+  animation: float-subtle 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-subtle { animation: none; }
+}
+
+/* ─── Gradient border glow (cards) ─── */
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(51, 102, 255, 0.15); box-shadow: 0 0 0 rgba(51, 102, 255, 0); }
+  50% { border-color: rgba(51, 102, 255, 0.3); box-shadow: 0 0 20px rgba(51, 102, 255, 0.1); }
+}
+
+.glow-border {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-border { animation: none; }
+}
+
+/* ─── Number tick (price change flash) ─── */
+@keyframes tick-up {
+  0% { color: #34d399; transform: translateY(0); }
+  30% { color: #34d399; transform: translateY(-3px); }
+  100% { color: inherit; transform: translateY(0); }
+}
+
+@keyframes tick-down {
+  0% { color: #f43f5e; transform: translateY(0); }
+  30% { color: #f43f5e; transform: translateY(3px); }
+  100% { color: inherit; transform: translateY(0); }
+}
+
+.tick-up { animation: tick-up 600ms ease-out; }
+.tick-down { animation: tick-down 600ms ease-out; }
+
+/* ─── Skeleton shimmer (enhanced) ─── */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.skeleton-enhanced {
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.08) 0%,
+    rgba(148, 163, 184, 0.2) 50%,
+    rgba(148, 163, 184, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-text,
+  .shimmer-text-primary,
+  .chart-line-animated,
+  .chart-area-animated,
+  .reveal-left,
+  .reveal-right,
+  .reveal-fade-scale {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    -webkit-text-fill-color: initial !important;
+    color: inherit !important;
+  }
+}
