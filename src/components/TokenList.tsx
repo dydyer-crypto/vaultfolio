@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useI18n } from "@/i18n/I18nProvider";
 import { chainMeta, type ChainId } from "@/lib/chains";
 import { formatAmount, formatCurrency, shortName } from "@/lib/format";
 import type { TokenBalance } from "@/lib/prices";
+import { TokenLogo } from "@/components/TokenLogo";
 
 interface TokenListProps {
   tokens: TokenBalance[];
@@ -56,23 +56,12 @@ export function TokenList({ tokens, loading, address }: TokenListProps) {
             className="card-pressable lift-on-hover flex items-center gap-3 rounded-xl border border-white/5 bg-slate-900/40 p-3 transition hover:border-white/10 hover:bg-slate-900/70"
           >
             <div className="relative flex-shrink-0">
-              {tok.logo ? (
-                <Image
-                  src={tok.logo}
-                  alt={tok.symbol}
-                  width={36}
-                  height={36}
-                  className="h-9 w-9 rounded-full"
-                  unoptimized
-                />
-              ) : (
-                <div
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white"
-                  style={{ backgroundColor: meta?.color ?? "#3366ff" }}
-                >
-                  {tok.symbol.slice(0, 2)}
-                </div>
-              )}
+              <TokenLogo
+                symbol={tok.symbol}
+                logo={tok.logo}
+                chainColor={meta?.color}
+                size={36}
+              />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">

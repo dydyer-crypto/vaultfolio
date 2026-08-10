@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useI18n } from "@/i18n/I18nProvider";
 import { CountUp } from "@/lib/useCountUp";
 import { Reveal } from "@/components/Reveal";
+import { TokenLogo } from "@/components/TokenLogo";
 
 interface PricePreview {
   symbol: string;
@@ -176,7 +176,7 @@ export function FintechHero() {
                   <div className="space-y-1.5">
                     {PRICE_FEEDS.map((feed) => (
                       <div key={feed.symbol} className="flex items-center gap-3 rounded-lg border border-white/5 bg-slate-900/40 px-3 py-2">
-                        <Image src={feed.logo} alt={feed.symbol} width={24} height={24} className="h-6 w-6 rounded-full" unoptimized />
+                        <TokenLogo symbol={feed.symbol} logo={feed.logo} chainColor={feed.color} size={24} />
                         <div className="flex-1">
                           <p className="text-xs font-medium text-white">{feed.symbol}</p>
                         </div>
