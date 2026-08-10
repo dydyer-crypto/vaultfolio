@@ -117,7 +117,7 @@ app.prepare().then(() => {
             },
             output: {
               format: { type: "audio/pcm", rate: 24000 },
-              voice: "alloy",
+              voice: "echo",
             },
           },
           max_output_tokens: 2048,
