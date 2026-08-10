@@ -3,7 +3,7 @@ import { parse } from "url";
 import next from "next";
 import { WebSocketServer, WebSocket } from "ws";
 
-const dev = process.env.NODE_ENV !== "production";
+const dev = false;
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const app = next({ dev });
 const handle = app.getRequestHandler();

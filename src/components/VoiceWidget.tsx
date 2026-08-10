@@ -97,6 +97,7 @@ export function VoiceWidget() {
       // ── Connect to our WebSocket relay ──
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${wsProtocol}//${window.location.host}/api/voice-ws`;
+      console.log("[voice] Connecting to:", wsUrl);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
@@ -168,7 +169,10 @@ export function VoiceWidget() {
 
       ws.onerror = () => {
         setStatus("error");
-        setErrorMsg("Connection error");
+        const msg = isFr
+          ? "Erreur de connexion. L'agent vocal nécessite : npm run start (pas npm run dev). F12 Console pour plus de détails."
+          : "Connection error. Voice agent requires npm run start (not npm run dev). Check Console for details.";
+        setErrorMsg(msg);
       };
 
       ws.onclose = () => {

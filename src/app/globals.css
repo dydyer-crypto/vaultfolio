@@ -26,15 +26,36 @@
     --ring: 224.3 76.3% 48%;
     --radius: 0.75rem;
   }
+}
 
-  * {
-    @apply border-border;
-  }
+/* ─── Base styles (NOT in @layer so they win over utilities) ─── */
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  background: #020617;
+  color-scheme: dark;
+  border: none;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #020617;
+  color: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: -apple-system, "Inter", system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-optical-sizing: auto;
 }
 
 :root {
-  color-scheme: dark;
-
   /* ─── UI Pro Max: Z-Index Scale (10/20/40/50/100) ─── */
   --z-base: 0;
   --z-content: 10;
@@ -73,19 +94,6 @@
 
   /* Press feedback timing */
   --press-duration: 100ms;
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  @apply bg-slate-950 text-slate-100 antialiased;
-  font-family: -apple-system, "Inter", system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-optical-sizing: auto;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 [dir="rtl"] body {
