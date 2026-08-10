@@ -7,10 +7,19 @@ dist
 .env*
 .DS_Store
 
+# Build artifacts
+.server-build/
+tsconfig.tsbuildinfo
+
+# Test files
+*.wav
+*.mp3
+
 # Playwright test artifacts
 .playwright-mcp/
 *.png
 
 # Backup zips
 vaultfolio-backup.zip
+vaultfolio-final.zip
 apple-design.zip

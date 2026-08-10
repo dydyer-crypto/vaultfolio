@@ -2,17 +2,19 @@ import { NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-const OPENAI_SESSIONS_URL = "https://api.openai.com/v1/realtime/sessions";
-const REALTIME_MODEL = "gpt-4o-realtime-preview-2024-12-17";
+/* ─── Model + URL ─── */
+const REALTIME_MODEL = "gpt-realtime";
+const OPENAI_WS_URL = "wss://api.openai.com/v1/realtime";
 
 /* ─── Guardrail constants ─── */
-const MAX_SESSION_DURATION_SEC = 300;          // 5 min per call
-const MAX_SESSIONS_PER_HOUR = 5;               // per IP
-const MAX_SESSIONS_PER_DAY = 20;              // per IP
-const MAX_CONCURRENT_SESSIONS = 20;           // global
-const MONTHLY_TOKEN_BUDGET_PER_IP = 500_000;   // ~$5 of realtime audio
-const GLOBAL_MONTHLY_BUDGET = 5_000_000;       // ~$50
+const MAX_SESSION_DURATION_SEC = 300;
+const MAX_SESSIONS_PER_HOUR = 5;
+const MAX_SESSIONS_PER_DAY = 20;
+const MAX_CONCURRENT_SESSIONS = 20;
+const MONTHLY_TOKEN_BUDGET_PER_IP = 500_000;
+const GLOBAL_MONTHLY_BUDGET = 5_000_000;
 
 /* ─── Redis keys ─── */
 const K_HOURLY = "vaultfolio:voice:hourly:";
@@ -39,7 +41,7 @@ function getClientIP(req: Request): string {
 
 async function checkRateLimits(ip: string): Promise<{ ok: boolean; reason?: string }> {
   const r = getRedis();
-  if (!r) return { ok: true }; // degrade gracefully without Redis
+  if (!r) return { ok: true };
 
   const now = Date.now();
   const hourKey = `${K_HOURLY}${ip}:${Math.floor(now / 3_600_000)}`;
@@ -57,113 +59,111 @@ async function checkRateLimits(ip: string): Promise<{ ok: boolean; reason?: stri
     if (hourCount === 1) await r.expire(hourKey, 3600);
     if (dayCount === 1) await r.expire(dayKey, 86400);
 
-    if ((hourCount ?? 0) > MAX_SESSIONS_PER_HOUR) {
-      return { ok: false, reason: `Rate limit: max ${MAX_SESSIONS_PER_HOUR} sessions/hour per IP` };
-    }
-    if ((dayCount ?? 0) > MAX_SESSIONS_PER_DAY) {
-      return { ok: false, reason: `Rate limit: max ${MAX_SESSIONS_PER_DAY} sessions/day per IP` };
-    }
-    if ((concurrent ?? 0) >= MAX_CONCURRENT_SESSIONS) {
-      return { ok: false, reason: `Server busy: max ${MAX_CONCURRENT_SESSIONS} concurrent sessions. Try again shortly.` };
-    }
-    if ((monthIp ?? 0) >= MONTHLY_TOKEN_BUDGET_PER_IP) {
-      return { ok: false, reason: `Monthly token budget exceeded for your IP. Contact support.` };
-    }
-    if ((monthGlobal ?? 0) >= GLOBAL_MONTHLY_BUDGET) {
-      return { ok: false, reason: `Global monthly budget reached. Voice assistant paused until next cycle.` };
-    }
+    if ((hourCount ?? 0) > MAX_SESSIONS_PER_HOUR)
+      return { ok: false, reason: `Rate limit: max ${MAX_SESSIONS_PER_HOUR} sessions/hour` };
+    if ((dayCount ?? 0) > MAX_SESSIONS_PER_DAY)
+      return { ok: false, reason: `Rate limit: max ${MAX_SESSIONS_PER_DAY} sessions/day` };
+    if ((concurrent ?? 0) >= MAX_CONCURRENT_SESSIONS)
+      return { ok: false, reason: `Server busy — try again shortly` };
+    if ((monthIp ?? 0) >= MONTHLY_TOKEN_BUDGET_PER_IP)
+      return { ok: false, reason: `Monthly budget exceeded for your IP` };
+    if ((monthGlobal ?? 0) >= GLOBAL_MONTHLY_BUDGET)
+      return { ok: false, reason: `Global monthly budget reached` };
 
     return { ok: true };
   } catch {
-    return { ok: true }; // degrade gracefully
+    return { ok: true };
   }
 }
 
 const SYSTEM_PROMPT = `You are the voice assistant for Vaultfolio, a multi-chain Web3 portfolio dashboard SaaS.
 
 ## Your role
-You are a sales assistant on the Vaultfolio website. Your goal is to inform prospects, answer questions, and guide them toward connecting their wallet or visiting the pricing page.
+You are a sales assistant on the Vaultfolio website. Inform prospects, answer questions, and guide them toward connecting their wallet or visiting the pricing page.
 
 ## About Vaultfolio
-- A read-only Web3 portfolio dashboard that aggregates balances, ERC-20 tokens, NFTs, and DeFi positions across 19 chains (Ethereum, Polygon, Base, Arbitrum, Optimism, Avalanche, BNB Chain, and 12 more)
-- Live prices via CoinGecko with 24h change
-- Read-only: no seed phrase, no signature, no spending approval, no fund access — 100% safe
-- Freemium model: Free ($0, 2 chains, 1 wallet), Pro ($9/mo or $79/yr, 6 chains, 3 wallets, DeFi, alerts, export, PnL history), Whale ($29/mo or $279/yr, 20+ chains, 20 wallets, analytics, white-label)
+- Read-only Web3 portfolio dashboard: balances, ERC-20 tokens, NFTs, DeFi positions across 19 chains
+- Live prices via CoinGecko, 24h change, read-only (no seed phrase, no signature, no fund access)
+- Freemium: Free ($0, 2 chains, 1 wallet), Pro ($9/mo or $79/yr, 6 chains, 3 wallets, DeFi, alerts, export), Whale ($29/mo or $279/yr, 20+ chains, 20 wallets, analytics, white-label)
 - Works with MetaMask, Coinbase, WalletConnect, Rainbow, Rabby
 - Setup in under 60 seconds
 
-## Key selling points
-1. Security: read-only, no signatures, no seed phrase — funds can never be moved
-2. Multi-chain: 19 chains in one dashboard instead of juggling 3+ explorers
-3. Speed: see your full portfolio in under 60 seconds
-4. Price: starts free, Pro is $9/mo (cheaper than DeBank/Zapper Pro)
-
-## Conversation guidelines
-- Keep responses short and conversational (2-4 sentences max per turn)
+## Guidelines
+- Keep responses short (2-4 sentences per turn)
 - Match the user's language (English, French, or Arabic)
-- If they ask about security, emphasize read-only and no signatures
-- If they ask about pricing, mention Free/Pro/Whale and suggest visiting the pricing page
-- If they ask about chains, list the main ones (Ethereum, Polygon, Base, Arbitrum, Optimism, Avalanche)
-- If they're ready to try, tell them to click "Connect Wallet" or visit /pricing
-- Be friendly, professional, and confident — not pushy
-- If they ask something you don't know, say you'll connect them with the team
-
-## Tone
-Warm, knowledgeable, concise. Like a helpful product specialist at an Apple Store.`;
+- Emphasize security: read-only, no signatures, funds can never be moved
+- If ready to try, tell them to click "Connect Wallet" or visit /pricing
+- Be friendly, professional, concise — like an Apple Store specialist`;
 
 export async function POST(req: Request) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "Voice assistant not configured (missing OPENAI_API_KEY)" }, { status: 503 });
+    return NextResponse.json({ error: "Voice assistant not configured" }, { status: 503 });
   }
 
   const ip = getClientIP(req);
 
-  // ── Guardrail 1: rate limits + budget ──
+  // ── Guardrail 1: rate limits ──
   const limitCheck = await checkRateLimits(ip);
   if (!limitCheck.ok) {
     return NextResponse.json({ error: limitCheck.reason ?? "Rate limited" }, { status: 429 });
   }
 
-  // ── Create ephemeral Realtime session ──
+  // ── Open WebSocket to OpenAI directly (no ephemeral token endpoint) ──
   try {
-    const res = await fetch(OPENAI_SESSIONS_URL, {
-      method: "POST",
+    const { WebSocket } = await import("ws");
+
+    const wsUrl = `${OPENAI_WS_URL}?model=${REALTIME_MODEL}`;
+    const upstream = new WebSocket(wsUrl, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
         "OpenAI-Beta": "realtime=v1",
       },
-      body: JSON.stringify({
-        model: REALTIME_MODEL,
-        voice: "alloy",
-        instructions: SYSTEM_PROMPT,
-        input_audio_format: "pcm16",
-        output_audio_format: "pcm16",
-        input_audio_transcription: { model: "whisper-1" },
-        turn_detection: {
-          type: "server_vad",
-          threshold: 0.5,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 500,
-        },
-        temperature: 0.7,
-        max_response_output_tokens: 500, // cap output per turn
-        // ephemeral token expires; OpenAI default ~10 min
-      }),
     });
 
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("OpenAI session creation failed:", res.status, errText);
-      return NextResponse.json({ error: "Failed to create voice session" }, { status: 502 });
+    const sessionId = `rt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    // Wait for connection with timeout
+    const connected = await new Promise<boolean>((resolve) => {
+      const timeout = setTimeout(() => resolve(false), 8000);
+      upstream.on("open", () => {
+        clearTimeout(timeout);
+        resolve(true);
+      });
+      upstream.on("error", () => {
+        clearTimeout(timeout);
+        resolve(false);
+      });
+    });
+
+    if (!connected) {
+      return NextResponse.json({ error: "Failed to connect to voice service" }, { status: 502 });
     }
 
-    const data = (await res.json()) as {
-      id: string;
-      client_secret: { value: string; expires_at: number };
-      expires_at: number;
-    };
+    // Send session config
+    upstream.send(
+      JSON.stringify({
+        type: "session.update",
+        session: {
+          instructions: SYSTEM_PROMPT,
+          voice: "alloy",
+          input_audio_format: "pcm16",
+          output_audio_format: "pcm16",
+          input_audio_transcription: { model: "whisper-1" },
+          turn_detection: {
+            type: "server_vad",
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 500,
+          },
+          temperature: 0.7,
+          max_response_output_tokens: 500,
+        },
+      })
+    );
+
+    // Keep connection alive briefly to confirm session is ready
+    await new Promise((r) => setTimeout(r, 500));
 
     // ── Guardrail 2: increment counters ──
     const r = getRedis();
@@ -171,20 +171,24 @@ export async function POST(req: Request) {
       try {
         await Promise.all([
           r.incr(K_CONCURRENT),
-          r.incrby(`${K_MONTHLY_IP}${ip}`, 8000),   // estimate ~8k tokens per session (audio+text)
+          r.incrby(`${K_MONTHLY_IP}${ip}`, 8000),
           r.incrby(K_MONTHLY_GLOBAL, 8000),
         ] as const);
       } catch {
-        // ignore Redis errors
+        // ignore
       }
     }
 
+    // Close the upstream — client will connect directly via WebSocket relay
+    upstream.close();
+
     return NextResponse.json({
-      sessionId: data.id,
-      clientSecret: data.client_secret.value,
-      expiresAt: data.expires_at,
+      sessionId,
+      status: "ready",
       maxDurationSec: MAX_SESSION_DURATION_SEC,
-      wsUrl: `wss://api.openai.com/v1/realtime?model=${REALTIME_MODEL}`,
+      model: REALTIME_MODEL,
+      // Client connects to our WebSocket relay endpoint
+      wsUrl: `/api/voice-proxy/ws?session=${sessionId}&ip=${encodeURIComponent(ip)}`,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
@@ -193,12 +197,11 @@ export async function POST(req: Request) {
   }
 }
 
-/* ── Cleanup endpoint: called by client when session ends ── */
+/* ── Cleanup: decrement concurrent counter ── */
 export async function DELETE(req: Request) {
   const r = getRedis();
   if (!r) return NextResponse.json({ ok: true });
 
-  const ip = getClientIP(req);
   try {
     const current = (await r.get<number>(K_CONCURRENT)) ?? 0;
     if (current > 0) await r.decr(K_CONCURRENT);

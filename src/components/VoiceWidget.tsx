@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
 const MAX_DURATION_SEC = 300;
-const RECONNECT_TIMEOUT_MS = 15_000;
 
 type Status = "idle" | "connecting" | "connected" | "listening" | "speaking" | "error";
 
@@ -58,7 +57,7 @@ export function VoiceWidget() {
     const chunk = playQueueRef.current.shift();
     if (chunk) {
       try {
-        const audioBuffer = await ctx.decodeAudioData(chunk);
+        const audioBuffer = pcm16ToAudioBuffer(ctx, chunk);
         const source = ctx.createBufferSource();
         source.buffer = audioBuffer;
         source.connect(ctx.destination);
@@ -69,7 +68,9 @@ export function VoiceWidget() {
         };
         source.start();
         setStatus("speaking");
-      } catch {
+        console.log("[voice] Playing", audioBuffer.length, "samples @", audioBuffer.sampleRate, "Hz");
+      } catch (e) {
+        console.error("[voice] Playback error:", e);
         isPlayingRef.current = false;
       }
     } else {
@@ -82,22 +83,7 @@ export function VoiceWidget() {
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/voice-proxy", { method: "POST" });
-      const data = (await res.json()) as {
-        clientSecret?: string;
-        wsUrl?: string;
-        error?: string;
-        maxDurationSec?: number;
-      };
-
-      if (!res.ok || !data.clientSecret || !data.wsUrl) {
-        const msg = data.error ?? "Connection failed";
-        setStatus("error");
-        setErrorMsg(msg);
-        return;
-      }
-
-      // ── Audio context ──
+      // ── Audio context + mic ──
       audioCtxRef.current = new AudioContext({ sampleRate: 24000 });
       micStreamRef.current = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -108,12 +94,10 @@ export function VoiceWidget() {
         },
       });
 
-      // ── WebSocket to OpenAI Realtime (with ephemeral token) ──
-      const ws = new WebSocket(
-        `${data.wsUrl}&authorization_bearer=${encodeURIComponent(data.clientSecret)}`,
-        ["realtime", "openai-insecure-api-key." + data.clientSecret]
-      );
-
+      // ── Connect to our WebSocket relay ──
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${wsProtocol}//${window.location.host}/api/voice-ws`;
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -121,7 +105,7 @@ export function VoiceWidget() {
         startTimeRef.current = Date.now();
         setElapsed(0);
 
-        // ── Start sending mic audio ──
+        // ── Start sending mic audio immediately ──
         const ctx = audioCtxRef.current!;
         const micStream = micStreamRef.current!;
         const source = ctx.createMediaStreamSource(micStream);
@@ -137,28 +121,43 @@ export function VoiceWidget() {
         };
 
         source.connect(processor);
-        processor.connect(ctx.destination);
+        // Do NOT connect processor to destination — causes feedback
+        // processor.connect(ctx.destination);
 
-        // ── Commit audio buffer + signal ready ──
-        ws.send(JSON.stringify({ type: "input_audio_buffer.commit" }));
-        ws.send(JSON.stringify({ type: "response.create" }));
+        // ── Agent se présente immédiatement ──
+        ws.send(JSON.stringify({
+          type: "response.create",
+          response: {
+            instructions: "Introduce yourself briefly as the Vaultfolio voice assistant. Say: 'Bonjour, je suis l'assistant vocal de Vaultfolio. Je peux vous présenter notre dashboard de portefeuille Web3 multi-chaînes. Posez-moi vos questions !' Adapt the language to match the user's browser language (French, English, or Arabic).",
+          },
+        }));
 
-        setStatus("listening");
+        setStatus("speaking");
       };
 
       ws.onmessage = (event) => {
-        const msg = JSON.parse(event.data) as Record<string, unknown>;
+        let msg: Record<string, unknown>;
+        try {
+          msg = JSON.parse(event.data as string);
+        } catch {
+          return;
+        }
         const type = msg.type as string;
 
-        if (type === "response.audio.delta") {
+        if (type === "session.ready") {
+          // Server confirmed session ready — start listening
+          return;
+        }
+
+        if (type === "response.output_audio.delta" || type === "response.audio.delta") {
           const audioBase64 = msg.delta as string;
           if (audioBase64) {
             const bytes = base64ToArrayBuffer(audioBase64);
             playQueueRef.current.push(bytes);
+            console.log("[voice] Audio chunk received:", bytes.byteLength, "bytes, queue:", playQueueRef.current.length);
             if (!isPlayingRef.current) void playAudioQueue();
           }
-        } else if (type === "response.audio.done" || type === "response.done") {
-          // response finished — back to listening
+        } else if (type === "response.output_audio.done" || type === "response.audio.done" || type === "response.done") {
           if (playQueueRef.current.length === 0) setStatus("listening");
         } else if (type === "error") {
           const errContent = msg.error as { message?: string } | undefined;
@@ -173,15 +172,14 @@ export function VoiceWidget() {
       };
 
       ws.onclose = () => {
-        if (status !== "error") setStatus("idle");
+        setStatus((prev) => (prev === "error" ? prev : "idle"));
       };
 
-      // ── Guardrail: client-side timer ──
-      const maxSec = data.maxDurationSec ?? MAX_DURATION_SEC;
+      // ── Client-side timer guardrail ──
       timerRef.current = setInterval(() => {
         const sec = Math.floor((Date.now() - startTimeRef.current) / 1000);
         setElapsed(sec);
-        if (sec >= maxSec) {
+        if (sec >= MAX_DURATION_SEC) {
           void stopSession();
         }
       }, 1000);
@@ -189,26 +187,18 @@ export function VoiceWidget() {
       setStatus("error");
       setErrorMsg(err instanceof Error ? err.message : "Failed to start");
     }
-  }, [status, playAudioQueue]);
+  }, [playAudioQueue]);
 
-  const stopSession = useCallback(async () => {
+  const stopSession = useCallback(() => {
     cleanup();
     setStatus("idle");
     setElapsed(0);
-    // notify proxy to decrement concurrent counter
-    try {
-      await fetch("/api/voice-proxy", { method: "DELETE" });
-    } catch {
-      // ignore
-    }
   }, [cleanup]);
 
-  // ── Cleanup on unmount ──
   useEffect(() => {
     return () => cleanup();
   }, [cleanup]);
 
-  // ── Show hint after 3 seconds idle ──
   useEffect(() => {
     if (status === "idle") {
       const t = setTimeout(() => setShowHint(true), 3000);
@@ -222,18 +212,14 @@ export function VoiceWidget() {
   const seconds = elapsed % 60;
   const timeDisplay = `${minutes}:${seconds.toString().padStart(2, "0")}`;
   const timeLeft = Math.max(0, MAX_DURATION_SEC - elapsed);
+  const isFr = typeof navigator !== "undefined" && navigator.language.startsWith("fr");
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
-      {/* Hint bubble */}
       {showHint && status === "idle" && (
         <div className="animate-spring-up material-light max-w-[240px] rounded-2xl border border-white/10 px-4 py-3 text-sm text-slate-200 shadow-lg">
-          <p className="font-medium text-white">
-            {navigator.language.startsWith("fr") ? "Une question ?" : "Have a question?"}
-          </p>
-          <p className="mt-0.5 text-xs text-slate-400">
-            {navigator.language.startsWith("fr") ? "Parlez a notre assistant vocal" : "Talk to our voice assistant"}
-          </p>
+          <p className="font-medium text-white">{isFr ? "Une question ?" : "Have a question?"}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{isFr ? "Parlez à notre assistant vocal" : "Talk to our voice assistant"}</p>
           <button
             className="pressable absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:text-white"
             onClick={() => setShowHint(false)}
@@ -246,20 +232,15 @@ export function VoiceWidget() {
         </div>
       )}
 
-      {/* Error message */}
       {status === "error" && errorMsg && (
         <div className="animate-spring-up max-w-[260px] rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-2 text-xs text-rose-300">
           {errorMsg}
-          <button
-            onClick={() => { setStatus("idle"); setErrorMsg(""); }}
-            className="pressable ml-2 underline"
-          >
-            {navigator.language.startsWith("fr") ? "Fermer" : "Dismiss"}
+          <button onClick={() => { setStatus("idle"); setErrorMsg(""); }} className="pressable ml-2 underline">
+            {isFr ? "Fermer" : "Dismiss"}
           </button>
         </div>
       )}
 
-      {/* Timer */}
       {isConnected && (
         <div className="material-light flex items-center gap-2 rounded-full px-3 py-1.5 text-xs">
           <span className={`pulse-dot flex h-2 w-2 rounded-full ${
@@ -270,7 +251,6 @@ export function VoiceWidget() {
         </div>
       )}
 
-      {/* Main button */}
       <button
         onClick={isConnected ? stopSession : startSession}
         disabled={status === "connecting"}
@@ -299,17 +279,14 @@ export function VoiceWidget() {
         )}
       </button>
 
-      {/* Auto-stop warning */}
       {isConnected && timeLeft <= 30 && timeLeft > 0 && (
         <div className="material-light animate-spring-in rounded-lg px-3 py-1.5 text-xs text-amber-300">
-          {navigator.language.startsWith("fr") ? `Fin dans ${timeLeft}s` : `Ending in ${timeLeft}s`}
+          {isFr ? `Fin dans ${timeLeft}s` : `Ending in ${timeLeft}s`}
         </div>
       )}
     </div>
   );
 }
-
-// ─── Audio helpers ───
 
 function floatToPcm16(float32Array: Float32Array): Int16Array {
   const pcm16 = new Int16Array(float32Array.length);
@@ -336,4 +313,20 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes.buffer;
+}
+
+function pcm16ToAudioBuffer(ctx: AudioContext, chunk: ArrayBuffer): AudioBuffer {
+  const view = new DataView(chunk);
+  const sampleCount = Math.floor(chunk.byteLength / 2);
+  // Use the context's actual sample rate — browser may not support 24000 Hz
+  const ctxRate = ctx.sampleRate || 24000;
+  const audioBuffer = ctx.createBuffer(1, sampleCount, ctxRate);
+  const channelData = audioBuffer.getChannelData(0);
+
+  for (let i = 0; i < sampleCount; i++) {
+    const sample = view.getInt16(i * 2, true);
+    channelData[i] = sample / 32768;
+  }
+
+  return audioBuffer;
 }
