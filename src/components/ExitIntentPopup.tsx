@@ -47,7 +47,7 @@ export function ExitIntentPopup() {
   const noThanks = isFr ? "Non merci" : "No thanks";
 
   return (
-    <div dir={dir} className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div dir={dir} className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-spring-in" onClick={() => setOpen(false)} />
       <div className="animate-material-in relative w-full max-w-md rounded-2xl material-thick p-6">
         <button

@@ -83,7 +83,8 @@ export function AlertsPanel({ tokens, enabled }: AlertsPanelProps) {
               </span>
               <button
                 onClick={() => void deleteAlert(a.id)}
-                className="text-slate-500 transition hover:text-rose-400"
+                className="pressable flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:text-rose-400"
+                aria-label="Delete alert"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12" />

@@ -215,15 +215,15 @@ export function VoiceWidget() {
   const isFr = typeof navigator !== "undefined" && navigator.language.startsWith("fr");
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+    <div className="fixed bottom-4 right-4 z-[var(--z-overlay)] flex flex-col items-end gap-2">
       {showHint && status === "idle" && (
         <div className="animate-spring-up material-light max-w-[240px] rounded-2xl border border-white/10 px-4 py-3 text-sm text-slate-200 shadow-lg">
           <p className="font-medium text-white">{isFr ? "Une question ?" : "Have a question?"}</p>
           <p className="mt-0.5 text-xs text-slate-400">{isFr ? "Parlez à notre assistant vocal" : "Talk to our voice assistant"}</p>
           <button
-            className="pressable absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:text-white"
+            className="pressable absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:text-white"
             onClick={() => setShowHint(false)}
-            aria-label="Dismiss"
+            aria-label="Dismiss hint"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />

@@ -14,7 +14,7 @@ export function Header() {
   const brandColor = brand?.color;
 
   return (
-    <header className="header-edge material sticky top-0 z-40">
+    <header className="header-edge material sticky top-0 z-[var(--z-sticky)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2">
           {brand?.logoUrl ? (
