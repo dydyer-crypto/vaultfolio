@@ -20,8 +20,10 @@ export function VoiceWidget() {
   const isPlayingRef = useRef(false);
   const startTimeRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intentionalCloseRef = useRef(false);
 
   const cleanup = useCallback(() => {
+    intentionalCloseRef.current = true;
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -85,8 +87,9 @@ export function VoiceWidget() {
   }, []);
 
   const startSession = useCallback(async () => {
-    setStatus("connecting");
-    setErrorMsg("");
+      intentionalCloseRef.current = false;
+      setStatus("connecting");
+      setErrorMsg("");
 
     try {
       // ── Audio context + mic ──
@@ -185,6 +188,11 @@ export function VoiceWidget() {
       };
 
       ws.onclose = (event) => {
+        if (intentionalCloseRef.current) {
+          // Fermeture volontaire (bouton stop) — pas d'erreur
+          setStatus("idle");
+          return;
+        }
         const sec = Math.floor((Date.now() - startTimeRef.current) / 1000);
         console.error(`[voice] WS CLOSED at ${sec}s: code=${event.code}, reason="${event.reason}", wasClean=${event.wasClean}`);
         setStatus((prev) => {
