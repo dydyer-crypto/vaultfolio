@@ -54,13 +54,19 @@ export function VoiceWidget() {
       isPlayingRef.current = false;
       return;
     }
+    if (ctx.state === "suspended") {
+      try { await ctx.resume(); } catch {}
+    }
     const chunk = playQueueRef.current.shift();
     if (chunk) {
       try {
         const audioBuffer = pcm16ToAudioBuffer(ctx, chunk);
         const source = ctx.createBufferSource();
         source.buffer = audioBuffer;
-        source.connect(ctx.destination);
+        const gain = ctx.createGain();
+        gain.gain.value = 1.0;
+        source.connect(gain);
+        gain.connect(ctx.destination);
         source.onended = () => {
           isPlayingRef.current = false;
           if (playQueueRef.current.length > 0) void playAudioQueue();
@@ -68,7 +74,7 @@ export function VoiceWidget() {
         };
         source.start();
         setStatus("speaking");
-        console.log("[voice] Playing", audioBuffer.length, "samples @", audioBuffer.sampleRate, "Hz");
+        console.log("[voice] Playing", audioBuffer.length, "samples @", audioBuffer.sampleRate, "Hz, ctx state:", ctx.state);
       } catch (e) {
         console.error("[voice] Playback error:", e);
         isPlayingRef.current = false;
@@ -84,7 +90,7 @@ export function VoiceWidget() {
 
     try {
       // ── Audio context + mic ──
-      audioCtxRef.current = new AudioContext({ sampleRate: 24000 });
+      audioCtxRef.current = new AudioContext();
       micStreamRef.current = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
@@ -116,24 +122,20 @@ export function VoiceWidget() {
         processor.onaudioprocess = (e) => {
           if (ws.readyState !== WebSocket.OPEN) return;
           const inputData = e.inputBuffer.getChannelData(0);
-          const pcm16 = floatToPcm16(inputData);
+          const pcm16 = floatToPcm16Resample(inputData, ctx.sampleRate || 48000, 24000);
           const base64 = arrayBufferToBase64(pcm16.buffer);
           ws.send(JSON.stringify({ type: "input_audio_buffer.append", audio: base64 }));
         };
 
         source.connect(processor);
-        // Do NOT connect processor to destination — causes feedback
-        // processor.connect(ctx.destination);
+        // ScriptProcessorNode needs a connection to destination to fire onaudioprocess —
+        // connect through a muted gain node to keep silence and avoid feedback
+        const muteGain = ctx.createGain();
+        muteGain.gain.value = 0;
+        processor.connect(muteGain);
+        muteGain.connect(ctx.destination);
 
-        // ── Agent se présente immédiatement ──
-        ws.send(JSON.stringify({
-          type: "response.create",
-          response: {
-            instructions: "Introduce yourself briefly as the Vaultfolio voice assistant. Say: 'Bonjour, je suis l'assistant vocal de Vaultfolio. Je peux vous présenter notre dashboard de portefeuille Web3 multi-chaînes. Posez-moi vos questions !' Adapt the language to match the user's browser language (French, English, or Arabic).",
-          },
-        }));
-
-        setStatus("speaking");
+        setStatus("listening");
       };
 
       ws.onmessage = (event) => {
@@ -146,7 +148,14 @@ export function VoiceWidget() {
         const type = msg.type as string;
 
         if (type === "session.ready") {
-          // Server confirmed session ready — start listening
+          // OpenAI session prête → l'agent se présente en premier
+          ws.send(JSON.stringify({
+            type: "response.create",
+            response: {
+              instructions: "Introduce yourself briefly as the Vaultfolio voice assistant. Say: 'Bonjour, je suis l'assistant vocal de Vaultfolio. Je peux vous présenter notre dashboard de portefeuille Web3 multi-chaînes. Posez-moi vos questions !' Adapt the language to match the user's browser language (French, English, or Arabic).",
+            },
+          }));
+          setStatus("speaking");
           return;
         }
 
@@ -292,13 +301,16 @@ export function VoiceWidget() {
   );
 }
 
-function floatToPcm16(float32Array: Float32Array): Int16Array {
-  const pcm16 = new Int16Array(float32Array.length);
-  for (let i = 0; i < float32Array.length; i++) {
-    const s = Math.max(-1, Math.min(1, float32Array[i]));
-    pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+function floatToPcm16Resample(float32Array: Float32Array, inputRate: number, outputRate: number): Int16Array {
+  const ratio = outputRate / inputRate;
+  const newLength = Math.floor(float32Array.length * ratio);
+  const result = new Int16Array(newLength);
+  for (let i = 0; i < newLength; i++) {
+    const origIndex = Math.floor(i / ratio);
+    const sample = Math.max(-1, Math.min(1, float32Array[origIndex]));
+    result[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
   }
-  return pcm16;
+  return result;
 }
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -322,9 +334,9 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
 function pcm16ToAudioBuffer(ctx: AudioContext, chunk: ArrayBuffer): AudioBuffer {
   const view = new DataView(chunk);
   const sampleCount = Math.floor(chunk.byteLength / 2);
-  // Use the context's actual sample rate — browser may not support 24000 Hz
-  const ctxRate = ctx.sampleRate || 24000;
-  const audioBuffer = ctx.createBuffer(1, sampleCount, ctxRate);
+  // PCM source is 24000 Hz — the browser resamples automatically at playback.
+  // Using ctx.sampleRate here would play at 2x speed on a 48000 Hz context.
+  const audioBuffer = ctx.createBuffer(1, sampleCount, 24000);
   const channelData = audioBuffer.getChannelData(0);
 
   for (let i = 0; i < sampleCount; i++) {
