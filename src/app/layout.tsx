@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "./providers";
+import { VoiceWidget } from "@/components/VoiceWidget";
 
 const SITE_URL = "https://vaultfolio.app";
 
@@ -67,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Providers>{children}</Providers>
+        <VoiceWidget />
       </body>
     </html>
   );
