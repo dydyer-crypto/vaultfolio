@@ -29,42 +29,49 @@ export function FintechHero() {
   useEffect(() => setMounted(true), []);
 
   const isFr = locale === "fr";
+  const isAr = locale === "ar";
 
   const copy = {
-    badge: isFr ? "Sécurité · Lecture seule · Multi-chaînes" : "Security · Read-only · Multi-chain",
-    title1: isFr ? "Votre portefeuille crypto," : "Your crypto portfolio,",
-    title2: isFr ? "sous contrôle total." : "in full control.",
+    badge: isFr ? "Sécurité · Lecture seule · Multi-chaînes" : isAr ? "أمان · قراءة فقط · متعدد السلاسل" : "Security · Read-only · Multi-chain",
+    title1: isFr ? "Votre portefeuille crypto," : isAr ? "محفظتك الرقمية،" : "Your crypto portfolio,",
+    title2: isFr ? "sous contrôle total." : isAr ? "بسيطرة كاملة." : "in full control.",
     subtitle: isFr
       ? "Soldes, tokens, NFTs et positions DeFi agrégés sur 19 chaînes. Prix live, alertes en temps réel, export fiscal — sans signer une seule transaction."
-      : "Balances, tokens, NFTs and DeFi positions aggregated across 19 chains. Live prices, real-time alerts, tax export — without signing a single transaction.",
-    cta: isFr ? "Voir mon portefeuille" : "See my portfolio",
-    ctaSecondary: isFr ? "Voir les plans" : "See plans",
-    trust1: isFr ? "Aucune seed phrase" : "No seed phrase",
-    trust2: isFr ? "Aucune signature" : "No signature required",
-    trust3: isFr ? "100% lecture seule" : "100% read-only",
-    trust4: isFr ? "Setup en 60s" : "Setup in 60s",
-    livePrices: isFr ? "Prix en direct" : "Live prices",
-    portfolioValue: isFr ? "Valeur du portefeuille" : "Portfolio value",
-    chainsLabel: isFr ? "Chaînes" : "Chains",
-    tokensLabel: isFr ? "Tokens" : "Tokens",
-    nftsLabel: isFr ? "NFTs" : "NFTs",
-    secTitle: isFr ? "Sécurité par conception" : "Security by design",
+      : isAr
+        ? "أرصدة ورموز و NFTs ومراكز DeFi مجمّعة على 19 سلسلة. أسعار حية وتنبيهات فورية وتصدير ضريبي — دون توقيع أي معاملة."
+        : "Balances, tokens, NFTs and DeFi positions aggregated across 19 chains. Live prices, real-time alerts, tax export — without signing a single transaction.",
+    cta: isFr ? "Voir mon portefeuille" : isAr ? "شاهد محفظتي" : "See my portfolio",
+    ctaSecondary: isFr ? "Voir les plans" : isAr ? "شاهد الخطط" : "See plans",
+    trust1: isFr ? "Aucune seed phrase" : isAr ? "لا توجد عبارة سرية" : "No seed phrase",
+    trust2: isFr ? "Aucune signature" : isAr ? "لا توقيع مطلوب" : "No signature required",
+    trust3: isFr ? "100% lecture seule" : isAr ? "قراءة فقط 100%" : "100% read-only",
+    trust4: isFr ? "Setup en 60s" : isAr ? "إعداد في 60 ثانية" : "Setup in 60s",
+    livePrices: isFr ? "Prix en direct" : isAr ? "أسعار حية" : "Live prices",
+    portfolioValue: isFr ? "Valeur du portefeuille" : isAr ? "قيمة المحفظة" : "Portfolio value",
+    chainsLabel: isFr ? "Chaînes" : isAr ? "السلاسل" : "Chains",
+    tokensLabel: isFr ? "Tokens" : isAr ? "الرموز" : "Tokens",
+    nftsLabel: isFr ? "NFTs" : isAr ? "NFTs" : "NFTs",
+    secTitle: isFr ? "Sécurité par conception" : isAr ? "أمان بالتصميم" : "Security by design",
     secDesc: isFr
       ? "Lecture seule des adresses publiques. Aucun accès aux fonds, aucune seed phrase, aucune approbation."
-      : "Read-only access to public addresses. No fund access, no seed phrase, no approvals.",
-    sec1: isFr ? "Aucune seed phrase demandée" : "No seed phrase required",
-    sec2: isFr ? "Aucune transaction à signer" : "No transactions to sign",
-    sec3: isFr ? "Zéro approbation de dépense" : "Zero spending approvals",
-    sec4: isFr ? "Adresses publiques uniquement" : "Public addresses only",
-    walletTitle: isFr ? "Connectez votre wallet" : "Connect your wallet",
+      : isAr
+        ? "قراءة فقط للعناوين العامة. لا وصول للأموال ولا كلمات سرية ولا موافقات."
+        : "Read-only access to public addresses. No fund access, no seed phrase, no approvals.",
+    sec1: isFr ? "Aucune seed phrase demandée" : isAr ? "لا توجد عبارة سرية مطلوبة" : "No seed phrase required",
+    sec2: isFr ? "Aucune transaction à signer" : isAr ? "لا معاملات للتوقيع" : "No transactions to sign",
+    sec3: isFr ? "Zéro approbation de dépense" : isAr ? "صفر موافقات إنفاق" : "Zero spending approvals",
+    sec4: isFr ? "Adresses publiques uniquement" : isAr ? "عناوين عامة فقط" : "Public addresses only",
+    walletTitle: isFr ? "Connectez votre wallet" : isAr ? "اربط محفظتك" : "Connect your wallet",
     walletDesc: isFr
       ? "MetaMask, Coinbase, WalletConnect, Rainbow, Rabby — tous compatibles."
-      : "MetaMask, Coinbase, WalletConnect, Rainbow, Rabby — all supported.",
-    trustTitle: isFr ? "Conçu pour les pros" : "Built for pros",
-    trustStat1: isFr ? "19 chaînes" : "19 chains",
-    trustStat2: isFr ? "$2.4M trackés" : "$2.4M tracked",
-    trustStat3: isFr ? "< 60s setup" : "< 60s setup",
-    trustStat4: isFr ? "0 signatures" : "0 signatures",
+      : isAr
+        ? "MetaMask و Coinbase و WalletConnect و Rainbow و Rabby — جميعهم مدعومون."
+        : "MetaMask, Coinbase, WalletConnect, Rainbow, Rabby — all supported.",
+    trustTitle: isFr ? "Conçu pour les pros" : isAr ? "مصمم للمحترفين" : "Built for pros",
+    trustStat1: isFr ? "19 chaînes" : isAr ? "19 سلسلة" : "19 chains",
+    trustStat2: isFr ? "$2.4M trackés" : isAr ? "$2.4M متتبّع" : "$2.4M tracked",
+    trustStat3: isFr ? "< 60s setup" : isAr ? "< 60 ثانية إعداد" : "< 60s setup",
+    trustStat4: isFr ? "0 signatures" : isAr ? "0 توقيعات" : "0 signatures",
   };
 
   return (
@@ -275,9 +282,9 @@ export function FintechHero() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
               { value: 19, label: copy.chainsLabel, suffix: "" },
-              { value: 2.4, label: isFr ? "Trackés" : "Tracked", prefix: "$", suffix: "M" },
+              { value: 2.4, label: isFr ? "Trackés" : isAr ? "متتبّع" : "Tracked", prefix: "$", suffix: "M" },
               { value: 60, label: "Setup", prefix: "<", suffix: "s" },
-              { value: 0, label: isFr ? "Signatures" : "Signatures", suffix: "" },
+              { value: 0, label: isFr ? "Signatures" : isAr ? "توقيعات" : "Signatures", suffix: "" },
             ].map((stat, i) => (
               <Reveal key={i} animation="spring-up" delay={i * 100}>
                 <div className="text-center">

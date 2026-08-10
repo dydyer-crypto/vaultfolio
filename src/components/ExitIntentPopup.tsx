@@ -38,13 +38,16 @@ export function ExitIntentPopup() {
 
   if (!open) return null;
 
-  const isFr = t("appName") === "Vaultfolio" && dir === "ltr";
-  const title = isFr ? "Avant de partir…" : "Wait before you leave…";
+  const isFr = dir === "ltr" && t("appName") === "Vaultfolio";
+  const isAr = dir === "rtl";
+  const title = isFr ? "Avant de partir…" : isAr ? "انتظر قبل المغادرة…" : "Wait before you leave…";
   const desc = isFr
     ? "Passez Pro aujourd'hui et économisez 27% sur l'année. Offre de lancement limitée."
-    : "Go Pro today and save 27% yearly. Limited launch offer.";
-  const cta = isFr ? "Profiter de l'offre" : "Claim the offer";
-  const noThanks = isFr ? "Non merci" : "No thanks";
+    : isAr
+      ? "ترقية إلى Pro اليوم ووفر 27% سنوياً. عرض إطلاق محدود."
+      : "Go Pro today and save 27% yearly. Limited launch offer.";
+  const cta = isFr ? "Profiter de l'offre" : isAr ? "احصل على العرض" : "Claim the offer";
+  const noThanks = isFr ? "Non merci" : isAr ? "لا شكراً" : "No thanks";
 
   return (
     <div dir={dir} className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">

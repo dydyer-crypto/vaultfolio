@@ -16,8 +16,27 @@ export default function SuccessPage() {
   }, []);
 
   const isFr = dir === "ltr" && t("appName") === "Vaultfolio";
+  const isAr = dir === "rtl";
 
   const tr = (key: string) => {
+    const ar: Record<string, string> = {
+      title: "تم تأكيد الدفع!",
+      subtitle: "اشتراكك نشط الآن. أهلاً بك في Vaultfolio Pro.",
+      back: "الانتقال إلى لوحة التحكم",
+      upsellTitle: "افتح المزيد من الميزات",
+      upsellSubtitle: "عروض خاصة متاحة فقط في هذه الصفحة",
+      proToWhale: "ترقية إلى Whale",
+      proToWhaleDesc: "20+ سلسلة، 20 محفظة، تحليلات PnL، و white-label",
+      proToWhalePrice: "+$20/شهر",
+      alerts: "تنبيهات متقدمة",
+      alertsDesc: "مخاطر التصفية، تتبع المحافظ الذكية، وتنبيهات Telegram",
+      alertsPrice: "+$5/شهر",
+      tax: "تصدير ضريبي",
+      taxDesc: "ملف CSV ضريبي، PnL المحقق، وتصدير Koinly/CoinTracking",
+      taxPrice: "$29 دفعة واحدة",
+      limited: "عرض الإطلاق — متاح لمدة 24 ساعة فقط",
+      claimed: "مفعّل بالفعل",
+    };
     const fr: Record<string, string> = {
       title: "Paiement confirmé !",
       subtitle: "Votre abonnement est actif. Bienvenue dans Vaultfolio Pro.",
@@ -54,7 +73,7 @@ export default function SuccessPage() {
       limited: "Launch offer — 24h only",
       claimed: "Already activated",
     };
-    return (isFr ? fr : en)[key] ?? key;
+    return (isAr ? ar : isFr ? fr : en)[key] ?? key;
   };
 
   const handleWhale = async () => {

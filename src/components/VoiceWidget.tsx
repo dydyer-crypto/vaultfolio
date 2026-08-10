@@ -242,14 +242,16 @@ export function VoiceWidget() {
   const seconds = elapsed % 60;
   const timeDisplay = `${minutes}:${seconds.toString().padStart(2, "0")}`;
   const timeLeft = Math.max(0, MAX_DURATION_SEC - elapsed);
-  const isFr = typeof navigator !== "undefined" && navigator.language.startsWith("fr");
+  const lang = typeof navigator !== "undefined" ? navigator.language : "en";
+  const isFr = lang.startsWith("fr");
+  const isAr = lang.startsWith("ar");
 
   return (
     <div className="fixed bottom-4 right-4 z-[var(--z-overlay)] flex flex-col items-end gap-2">
       {showHint && status === "idle" && (
         <div className="animate-spring-up material-light max-w-[240px] rounded-2xl border border-white/10 px-4 py-3 text-sm text-slate-200 shadow-lg">
-          <p className="font-medium text-white">{isFr ? "Une question ?" : "Have a question?"}</p>
-          <p className="mt-0.5 text-xs text-slate-400">{isFr ? "Parlez à notre assistant vocal" : "Talk to our voice assistant"}</p>
+          <p className="font-medium text-white">{isFr ? "Une question ?" : isAr ? "لديك سؤال؟" : "Have a question?"}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{isFr ? "Parlez à notre assistant vocal" : isAr ? "تحدّث إلى مساعدنا الصوتي" : "Talk to our voice assistant"}</p>
           <button
             className="pressable absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:text-white"
             onClick={() => setShowHint(false)}
@@ -266,7 +268,7 @@ export function VoiceWidget() {
         <div className="animate-spring-up max-w-[260px] rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-2 text-xs text-rose-300">
           {errorMsg}
           <button onClick={() => { setStatus("idle"); setErrorMsg(""); }} className="pressable ml-2 underline">
-            {isFr ? "Fermer" : "Dismiss"}
+            {isFr ? "Fermer" : isAr ? "إغلاق" : "Dismiss"}
           </button>
         </div>
       )}
@@ -311,7 +313,7 @@ export function VoiceWidget() {
 
       {isConnected && timeLeft <= 30 && timeLeft > 0 && (
         <div className="material-light animate-spring-in rounded-lg px-3 py-1.5 text-xs text-amber-300">
-          {isFr ? `Fin dans ${timeLeft}s` : `Ending in ${timeLeft}s`}
+          {isFr ? `Fin dans ${timeLeft}s` : isAr ? `ينتهي خلال ${timeLeft}ث` : `Ending in ${timeLeft}s`}
         </div>
       )}
     </div>
