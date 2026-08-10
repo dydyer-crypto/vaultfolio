@@ -82,9 +82,9 @@ app.prepare().then(() => {
               transcription: { model: "whisper-1" },
               turn_detection: {
                 type: "server_vad",
-                threshold: 0.5,
-                prefix_padding_ms: 300,
-                silence_duration_ms: 500,
+                threshold: 0.6,
+                prefix_padding_ms: 400,
+                silence_duration_ms: 1200,
               },
             },
             output: {
@@ -92,7 +92,7 @@ app.prepare().then(() => {
               voice: "alloy",
             },
           },
-          max_output_tokens: 500,
+          max_output_tokens: 2048,
         },
       }));
       upstreamReady = true;

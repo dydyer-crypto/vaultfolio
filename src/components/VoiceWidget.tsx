@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
-const MAX_DURATION_SEC = 300;
+const MAX_DURATION_SEC = 900; // 15 minutes — enough for a real conversation
 
 type Status = "idle" | "connecting" | "connected" | "listening" | "speaking" | "error";
 
