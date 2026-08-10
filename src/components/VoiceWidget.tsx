@@ -155,7 +155,7 @@ export function VoiceWidget() {
           ws.send(JSON.stringify({
             type: "response.create",
             response: {
-              instructions: "Introduce yourself briefly as the Vaultfolio voice assistant. Say: 'Bonjour, je suis l'assistant vocal de Vaultfolio. Je peux vous présenter notre dashboard de portefeuille Web3 multi-chaînes. Posez-moi vos questions !' Adapt the language to match the user's browser language (French, English, or Arabic).",
+              instructions: "Introduce yourself as the Vaultfolio voice assistant in ENGLISH. Say: 'Hello! I'm the Vaultfolio voice assistant. I can introduce you to our multi-chain Web3 portfolio dashboard. I speak many languages — French, Arabic, Spanish, and more — so feel free to talk to me in any of them. Ask me anything!",
             },
           }));
           setStatus("speaking");
