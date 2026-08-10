@@ -59,6 +59,28 @@ app.prepare().then(() => {
       return;
     }
 
+    console.log(`[voice] Browser connected at ${new Date().toISOString()}`);
+
+    // ── Heartbeat: keep both connections alive ──
+    let lastPing = Date.now();
+    const pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.ping();
+      }
+      if (upstream.readyState === WebSocket.OPEN) {
+        upstream.ping();
+      }
+    }, 20000);
+
+    // ── Timeout warning log ──
+    let timeoutWarning: ReturnType<typeof setTimeout> | null = null;
+    const resetInactivityTimer = () => {
+      if (timeoutWarning) clearTimeout(timeoutWarning);
+      timeoutWarning = setTimeout(() => {
+        console.log(`[voice] Warning: no activity detected for 30s ${new Date().toISOString()}`);
+      }, 30000);
+    };
+
     // ── Connect to OpenAI Realtime (GA API — no beta header) ──
     const wsUrl = `${OPENAI_WS_URL}?model=${REALTIME_MODEL}`;
     const upstream = new WebSocket(wsUrl, {
@@ -113,23 +135,38 @@ app.prepare().then(() => {
     });
 
     upstream.on("close", () => {
-      console.log("[voice] OpenAI closed");
-      if (ws.readyState === WebSocket.OPEN) ws.close();
+      console.log(`[voice] OpenAI closed at ${new Date().toISOString()}`);
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "session.ended", reason: "upstream_closed" }));
+        ws.close();
+      }
     });
 
     // ── Browser → OpenAI: forward audio + control messages ──
     ws.on("message", (data: Buffer) => {
+      lastPing = Date.now();
+      resetInactivityTimer();
       if (!upstreamReady || upstream.readyState !== WebSocket.OPEN) return;
       // Forward as-is (JSON messages with audio buffer append, commit, response.create)
       upstream.send(data.toString());
     });
 
-    ws.on("close", () => {
-      console.log("[voice] Browser closed, cleaning up");
+    ws.on("close", (code, reason) => {
+      console.log(`[voice] Browser closed: code=${code}, reason="${reason.toString()}" at ${new Date().toISOString()}`);
+      clearInterval(pingInterval);
+      if (timeoutWarning) clearTimeout(timeoutWarning);
       if (upstream.readyState === WebSocket.OPEN) upstream.close();
     });
 
-    ws.on("error", () => {
+    ws.on("pong", () => {
+      lastPing = Date.now();
+      resetInactivityTimer();
+    });
+
+    ws.on("error", (err) => {
+      console.error("[voice] Browser WS error:", err.message);
+      clearInterval(pingInterval);
+      if (timeoutWarning) clearTimeout(timeoutWarning);
       if (upstream.readyState === WebSocket.OPEN) upstream.close();
     });
   });

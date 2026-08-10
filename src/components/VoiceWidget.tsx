@@ -184,8 +184,17 @@ export function VoiceWidget() {
         setErrorMsg(msg);
       };
 
-      ws.onclose = () => {
-        setStatus((prev) => (prev === "error" ? prev : "idle"));
+      ws.onclose = (event) => {
+        const sec = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        console.error(`[voice] WS CLOSED at ${sec}s: code=${event.code}, reason="${event.reason}", wasClean=${event.wasClean}`);
+        setStatus((prev) => {
+          if (prev === "error") return prev;
+          const msg = isFr
+            ? `Connexion perdue à ${sec}s. Code: ${event.code}. Relance npm run start et réessaie.`
+            : `Connection lost at ${sec}s. Code: ${event.code}. Run npm run start and retry.`;
+          setErrorMsg(msg);
+          return "error";
+        });
       };
 
       // ── Client-side timer guardrail ──
