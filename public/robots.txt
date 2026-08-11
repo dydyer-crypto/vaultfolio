@@ -4,4 +4,22 @@ Allow: /
 Disallow: /api/
 Disallow: /success
 
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCbot
+Allow: /
+
+User-agent: BrotliBot
+Allow: /
+
 Sitemap: https://vaultfolio.app/sitemap.xml

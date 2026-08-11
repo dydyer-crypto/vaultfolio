@@ -11,6 +11,8 @@ import { Footer } from "@/components/Footer";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { cn } from "@/lib/format";
 
+const SITE_URL = "https://vaultfolio.app";
+
 export default function PricingPage() {
   const { t, dir } = useI18n();
   const { address, isConnected } = useAccount();
@@ -28,8 +30,47 @@ export default function PricingPage() {
     }
   };
 
+  const pricingSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "Vaultfolio",
+    description: "Multi-chain Web3 portfolio dashboard for European investors",
+    url: `${SITE_URL}/pricing`,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "USD",
+      lowPrice: "0",
+      highPrice: "29",
+      offerCount: "3",
+      offers: [
+        { "@type": "Offer", name: "Starter", price: "0", priceCurrency: "USD" },
+        { "@type": "Offer", name: "Pro", price: "9", priceCurrency: "USD" },
+        { "@type": "Offer", name: "Whale", price: "29", priceCurrency: "USD" },
+      ],
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Pricing", item: `${SITE_URL}/pricing` },
+    ],
+  };
+
   return (
     <div dir={dir} className="min-h-screen">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+      </head>
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
         {/* Header */}

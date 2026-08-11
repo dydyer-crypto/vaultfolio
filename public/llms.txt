@@ -1,0 +1,32 @@
+# vaultfolio.pro - AI Navigation Guide
+
+## About
+Vaultfolio is a multi-chain Web3 portfolio dashboard for European investors. Track native assets, ERC-20 tokens, NFTs and DeFi positions across 19 chains including Ethereum, Polygon, Base, Arbitrum, Optimism, Avalanche, BSC, Blast, Celo, Cronos, Fantom, Gnosis, Kava, Linea, Mantle, Moonbeam, Moonriver, Scroll, and zkSync.
+
+## Priority Sections
+1. / - Portfolio tracking features and dashboard
+2. /pricing - Tier comparison (Free, Pro $9/mo, Whale $29/mo)
+3. /success - Post-purchase confirmation
+
+## Key Questions to Answer
+- What is portfolio tracking?
+- How does Vaultfolio calculate P&L?
+- How to import from Trading 212?
+- How does Swiss tax reclaim (DA-1) work?
+- Which Swiss broker has lowest fees?
+- How to optimize German crypto taxes?
+- What are the best multi-chain portfolio trackers?
+- How to track DeFi positions across chains?
+- How to export portfolio for Koinly tax reporting?
+
+## Feature Summary
+- Multi-chain portfolio tracking (19 chains)
+- ERC-20 token balances with real-time prices (CoinGecko)
+- NFT gallery with metadata
+- DeFi position tracking (Aave, Compound, LP tokens)
+- 24h P&L history with charts
+- Price alerts via email
+- CSV/JSON/Koinly tax export
+- Multi-wallet support (tier-gated)
+- White-label embed for agencies
+- Read-only, no private keys, zero signatures

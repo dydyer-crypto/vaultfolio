@@ -319,13 +319,13 @@ const fr: SalesCopy = {
 
   faqTitle: "FAQ",
   faq: [
-    { q: "Vaultfolio peut-il déplacer mes fonds ?", a: "Non. Vaultfolio est en lecture seule. Il lit les données on-chain de vos wallets sans autorisation de dépense." },
-    { q: "Quelles chaînes sont prises en charge ?", a: "Starter inclut Ethereum + Polygon. Pro ajoute Base, Arbitrum, Optimism, Avalanche. Whale étend à 20+ chaînes." },
-    { q: "Puis-je suivre plusieurs wallets ?", a: "Oui. Free : 1 wallet. Pro : 3 wallets. Whale : 20 wallets." },
-    { q: "Les NFTs sont-ils visibles ?", a: "Oui. Les NFTs ERC-721 / ERC-1155 sont affichés avec visuels et liens explorateur." },
-    { q: "D'où viennent les prix ?", a: "Les prix live sont fournis via CoinGecko." },
-    { q: "À qui s'adresse Vaultfolio ?", a: "Aux investisseurs crypto particuliers, traders, utilisateurs DeFi, collectionneurs NFT, DAOs, treasury managers et wealth managers crypto." },
-    { q: "Comment fonctionne le paiement ?", a: "Les abonnements sont gérés via Stripe Checkout, en mensuel ou annuel." },
+    { q: "Vaultfolio peut-il déplacer mes fonds ?", a: "Non. Vaultfolio est en lecture seule. Il lit les données on-chain de vos wallets sans autorisation de dépense. Aucune clé privée n'est jamais transmise." },
+    { q: "Quelles chaînes sont prises en charge ?", a: "Starter inclut Ethereum et Polygon. Pro ajoute Base, Arbitrum, Optimism et Avalanche. Whale étend à plus de 20 chaînes dont Blast, Celo, Scroll et zkSync." },
+    { q: "Puis-je suivre plusieurs wallets ?", a: "Oui. Le plan Free permet 1 wallet. Le plan Pro permet 3 wallets. Le plan Whale permet jusqu'à 20 wallets simultanés." },
+    { q: "Les NFTs sont-ils visibles ?", a: "Oui. Les NFTs ERC-721 et ERC-1155 sont affichés avec leurs visuels, noms et liens vers l'explorateur de la blockchain." },
+    { q: "D'où viennent les prix ?", a: "Les prix en temps réel sont fournis par l'API CoinGecko. Ils sont mis à jour toutes les minutes pour les tokens ERC-20 et les positions DeFi." },
+    { q: "À qui s'adresse Vaultfolio ?", a: "Vaultfolio est conçu pour les investisseurs crypto particuliers, les traders, les utilisateurs DeFi, les collectionneurs NFT, les DAOs, les gestionnaires de trésorerie et les wealth managers crypto." },
+    { q: "Comment fonctionne le paiement ?", a: "Les abonnements sont gérés exclusivement via Stripe Checkout. Vous pouvez choisir un paiement mensuel ou annuel avec réduction sur l'annuel." },
   ],
 
   pricingBadge: "Le plus populaire",
@@ -550,13 +550,13 @@ const en: SalesCopy = {
 
   faqTitle: "FAQ",
   faq: [
-    { q: "Can Vaultfolio move my funds?", a: "No. Vaultfolio is read-only. It reads on-chain data from your wallets without spending authorization." },
-    { q: "Which chains are supported?", a: "Starter includes Ethereum + Polygon. Pro adds Base, Arbitrum, Optimism, Avalanche. Whale extends to 20+ chains." },
-    { q: "Can I track multiple wallets?", a: "Yes. Free: 1 wallet. Pro: 3 wallets. Whale: 20 wallets." },
-    { q: "Are NFTs visible?", a: "Yes. ERC-721 / ERC-1155 NFTs are displayed with visuals and explorer links." },
-    { q: "Where do prices come from?", a: "Live prices are provided via CoinGecko." },
-    { q: "Who is Vaultfolio for?", a: "Retail crypto investors, traders, DeFi users, NFT collectors, DAOs, treasury managers and crypto wealth managers." },
-    { q: "How does payment work?", a: "Subscriptions are managed via Stripe Checkout, monthly or yearly." },
+    { q: "Can Vaultfolio move my funds?", a: "No. Vaultfolio is read-only. It reads on-chain data from your wallets without spending authorization. No private keys are ever transmitted." },
+    { q: "Which chains are supported?", a: "Starter includes Ethereum and Polygon. Pro adds Base, Arbitrum, Optimism and Avalanche. Whale extends to 20+ chains including Blast, Celo, Scroll and zkSync." },
+    { q: "Can I track multiple wallets?", a: "Yes. Free: 1 wallet. Pro: 3 wallets. Whale: up to 20 wallets simultaneously." },
+    { q: "Are NFTs visible?", a: "Yes. ERC-721 and ERC-1155 NFTs are displayed with their visuals, names and blockchain explorer links." },
+    { q: "Where do prices come from?", a: "Live prices are provided via the CoinGecko API. They are refreshed every minute for ERC-20 tokens and DeFi positions." },
+    { q: "Who is Vaultfolio for?", a: "Vaultfolio is designed for retail crypto investors, traders, DeFi users, NFT collectors, DAOs, treasury managers and crypto wealth managers." },
+    { q: "How does payment work?", a: "Subscriptions are managed exclusively via Stripe Checkout. You can choose monthly or yearly billing with a discount on the annual plan." },
   ],
 
   pricingBadge: "Most popular",
@@ -781,13 +781,13 @@ const ar: SalesCopy = {
 
   faqTitle: "الأسئلة الشائعة",
   faq: [
-    { q: "هل يمكن لـ Vaultfolio تحريك أموالي؟", a: "لا. Vaultfolio للقراءة فقط. يقرأ بيانات on-chain من محافظك دون إذن إنفاق." },
-    { q: "ما السلاسل المدعومة؟", a: "تشمل Starter: Ethereum + Polygon. يضيف Pro: Base و Arbitrum و Optimism و Avalanche. يمتد Whale إلى 20+ سلسلة." },
-    { q: "هل يمكنني تتبّع محافظ متعددة؟", a: "نعم. مجاني: 1 محفظة. Pro: 3 محافظ. Whale: 20 محفظة." },
-    { q: "هل NFTs مرئية؟", a: "نعم. تُعرض NFTs ERC-721 / ERC-1155 مع الصور وروابط المستكشف." },
-    { q: "من أين تأتي الأسعار؟", a: "الأسعار الحية متوفّرة عبر CoinGecko." },
-    { q: "لمن موجّه Vaultfolio؟", a: "لمستثمري الكريبتو الأفراد والمتداولين ومستخدمي DeFi وجامعي NFT و DAOs ومديري الخزينة ومديري ثروات الكريبتو." },
-    { q: "كيف يعمل الدفع؟", a: "تُدار الاشتراكات عبر Stripe Checkout، شهرياً أو سنوياً." },
+    { q: "هل يمكن لـ Vaultfolio تحريك أموالي؟", a: "لا. Vaultfolio للقراءة فقط. يقرأ بيانات on-chain من محافظك دون إذن إنفاق. لا تُرسل أي مفاتيح خاصة." },
+    { q: "ما السلاسل المدعومة؟", a: "تشمل Starter: Ethereum و Polygon. يضيف Pro: Base و Arbitrum و Optimism و Avalanche. يمتد Whale إلى أكثر من 20 سلسلة بما فيها Blast و Celo و Scroll و zkSync." },
+    { q: "هل يمكنني تتبّع محافظ متعددة؟", a: "نعم. مجاني: محفظة واحدة. Pro: 3 محافظ. Whale: حتى 20 محفظة في وقت واحد." },
+    { q: "هل NFTs مرئية؟", a: "نعم. تُعرض NFTs ERC-721 و ERC-1155 مع صورها وأسمائها وروابط المستكشف." },
+    { q: "من أين تأتي الأسعار؟", a: "الأسعار الحية تأتي من واجهة CoinGecko API وتُحدّث كل دقيقة للرموز ERC-20 والمراكز DeFi." },
+    { q: "لمن موجّه Vaultfolio؟", a: "Vaultfolio موجّه للمستثمرين الأفراد، المتداولين، مستخدمي DeFi، جامعي NFTs، DAOs، مديري الخزينة ومديري ثروات الكريبتو." },
+    { q: "كيف يعمل الدفع؟", a: "تُدار الاشتراكات حصرياً عبر Stripe Checkout. يمكنك الاختيار بين الدفع الشهري أو السنوي مع خصم على الخطة السنوية." },
   ],
 
   pricingBadge: "الأكثر شيوعاً",
