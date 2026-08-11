@@ -11,6 +11,20 @@ Write-Host "🚂 Railway Auto-Deploy Waiter" -ForegroundColor Cyan
 Write-Host "This script will retry deployment until Railway is healthy." -ForegroundColor Gray
 Write-Host ""
 
+# ── Ensure a project is linked ──
+Write-Host "Checking Railway project link..." -ForegroundColor Gray
+$linkCheck = & railway status 2>&1
+if ($linkCheck -match "No linked project|not linked|run `railway link`") {
+    Write-Host "⚠️  No Railway project linked in this folder." -ForegroundColor Yellow
+    Write-Host "Launching 'railway link'..." -ForegroundColor Cyan
+    railway link
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ railway link failed or was cancelled. Exiting." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "✅ Project linked successfully." -ForegroundColor Green
+}
+
 $retryCount = 0
 $success = $false
 
