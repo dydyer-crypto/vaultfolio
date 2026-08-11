@@ -1,0 +1,42 @@
+# Ignore frontend (deployed on Vercel)
+.next/
+src/
+app/
+components/
+content/
+hooks/
+i18n/
+lib/
+public/
+!public/robots.txt
+!public/llms.txt
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+*.log
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Vercel
+.vercel/
+
+# Documentation (not needed for backend)
+*.md
+!README.md
