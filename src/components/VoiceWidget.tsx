@@ -103,9 +103,22 @@ export function VoiceWidget() {
         },
       });
 
-      // ── Connect to our WebSocket relay ──
-      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${wsProtocol}//${window.location.host}/api/voice-ws`;
+      // ── Connect to Voice Proxy (Railway in prod, local in dev) ──
+      const envUrl = process.env.NEXT_PUBLIC_VOICE_PROXY_URL;
+      let wsUrl: string;
+
+      if (envUrl) {
+        // Production: use Railway backend
+        wsUrl = envUrl;
+      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Local dev: direct to local voice proxy
+        wsUrl = 'ws://localhost:8080';
+      } else {
+        // Fallback (should not happen in prod if env var is set)
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        wsUrl = `${wsProtocol}//${window.location.host}/api/voice-ws`;
+      }
+
       console.log("[voice] Connecting to:", wsUrl);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
